@@ -11,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import io.quarkus.oidc.OidcConfigurationMetadata;
+import io.quarkus.oidc.UserInfo;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 
@@ -21,7 +23,21 @@ public class GreetingResource {
     SecurityIdentity securityIdentity;
 
     @Inject
+    OidcConfigurationMetadata provider;
+
+    @Inject
+    UserInfo userInfo;
+
+    @Inject
     JsonWebToken accessToken;
+
+    @GET
+    @Path("/languages")
+    @Produces(MediaType.APPLICATION_JSON)
+    @PermitAll
+    public String getLanguages() {
+        return "[\"en\", \"es\", \"fr\"]";
+    }
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -74,13 +90,42 @@ public class GreetingResource {
     @GET
     @Path("/whoami")
     @Produces(MediaType.TEXT_PLAIN)
-    @PermitAll
     public String whoAmI() {
         return this.securityIdentity.getPrincipal().getName() + " " +
                 this.securityIdentity.getRoles().toString() + ": " +
-                (accessToken != null ?
-                    "token issued by " + accessToken.getIssuer() + " on " + accessToken.getIssuedAtTime() + " " +
-                    "for " + accessToken.getSubject() + " until " + accessToken.getExpirationTime() + " " +
+                (this.accessToken != null ?
+                    "token issued by " + accessToken.getIssuer() + " " +
+                    "on " + accessToken.getIssuedAtTime() + " " +
+                    "for " + accessToken.getSubject() + " " +
+                    "until " + accessToken.getExpirationTime() + " " +
                     "with claims " + accessToken.getClaimNames() : "no JWT");
+    }
+
+    @GET
+    @Path("/oidc")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getProviderInfo() {
+        return "issuer: " + this.provider.getIssuer() + ",\n" +
+                "auth at: " + this.provider.getAuthorizationUri() + ",\n" +
+                "introspect at: " + this.provider.getIntrospectionUri() + ",\n" +
+                "end session at: " + this.provider.getEndSessionUri() + ",\n" +
+                "web key set at: " + this.provider.getJsonWebKeySetUri() + ",\n" +
+                "token at: " + this.provider.getTokenUri() + ",\n" +
+                "userinfo at: " + this.provider.getUserInfoUri() + ",\n" +
+                "supports: " + this.provider.getSupportedScopes().toString();
+    }
+
+    @GET
+    @Path("/userinfo")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getUserInfo() {
+        return this.userInfo.getUserInfoString();
+    }
+
+    @GET
+    @Path("/jwt")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String getJwt() {
+        return this.accessToken.getRawToken();
     }
 }
