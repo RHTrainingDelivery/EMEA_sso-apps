@@ -4,3 +4,7 @@
 kubeconfig*
 kubeadmin*
 tmp*
+node_modules
+dist
+target
+*.code-workspace
