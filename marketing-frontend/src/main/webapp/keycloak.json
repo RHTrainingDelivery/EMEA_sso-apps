@@ -1,0 +1,8 @@
+{
+  "realm": "REALM-NAME",
+  "auth-server-url": "https://RHSSO-SERVER-URL/auth/",
+  "ssl-required": "external",
+  "resource": "CLIENT-ID",
+  "public-client": true,
+  "confidential-port": 0
+}
