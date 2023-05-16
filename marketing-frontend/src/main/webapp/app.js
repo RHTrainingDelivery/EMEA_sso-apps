@@ -21,6 +21,7 @@ function showTokens(){
     //document.getElementById("output").innerHTML = jwt_decode(keycloak.showToken);
 }
 function request(endpoint) {
+    console.log("keycloak.authenticated: " + keycloak.authenticated);
     var req = function() {
         var req = new XMLHttpRequest();
         var output = document.getElementById('message');
@@ -48,11 +49,13 @@ function request(endpoint) {
         req.send();
     };
 
-    if (keycloak.authenticated) {
-        keycloak.updateToken(30).success(req);
-    } else {
-        req();
-    }
+    req();
+
+    // if (keycloak.authenticated) {
+    //     keycloak.updateToken(30).success(req);
+    // } else {
+    //     req();
+    // }
 }
 
 window.onload = function () {
