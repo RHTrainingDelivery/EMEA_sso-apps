@@ -1,6 +1,6 @@
 
 var keycloak = new Keycloak();
-var serviceUrl = 'http://localhost:3000/campaign'
+var serviceUrl = 'http://workstation.lab.example.com:3000/campaign'
 
 function notAuthenticated() {
     document.getElementById('not-authenticated').style.display = 'block';
@@ -17,8 +17,8 @@ function showTokens(){
    
     document.getElementById("idtoken").innerHTML = "ID Token</br>"+JSON.stringify(jwt_decode(keycloak.idToken), null, '  ');
     document.getElementById("accesstoken").innerHTML = "Access Token (bearer)</br>"+JSON.stringify(jwt_decode(keycloak.token), null, '  ');
-    document.getElementById("refreshtoken").innerHTML = "Refresh Token</br>"+JSON.stringify(jwt_decode(keycloak.refreshToken), null, '  ');
-   //document.getElementById("output").innerHTML = jwt_decode(keycloak.showToken);
+    //document.getElementById("refreshtoken").innerHTML = "Refresh Token</br>"+JSON.stringify(jwt_decode(keycloak.refreshToken), null, '  ');
+    //document.getElementById("output").innerHTML = jwt_decode(keycloak.showToken);
 }
 function request(endpoint) {
     var req = function() {
@@ -56,7 +56,7 @@ function request(endpoint) {
 }
 
 window.onload = function () {
-    keycloak.init({ onLoad: 'check-sso', checkLoginIframeInterval: 1 }).success(function () {
+    keycloak.init({ onLoad: 'check-sso', flow: 'implicit', checkLoginIframeInterval: 1 }).success(function () {
         if (keycloak.authenticated) {
             authenticated();
         } else {
