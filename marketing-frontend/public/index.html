@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keycloak SPA</title>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Red Hat Build of Keycloak Single Page App</h1>
+  <div id="content">
+    <button id="login-btn">Login</button>
+    <button id="logout-btn" style="display: none;">Logout</button>
+    <button id="show-token-btn" style="display: none;">Show Token</button>
+    <button id="list-campaigns-btn">List Campaigns</button>
+    <pre id="output"></pre>
+    <table id="campaigns-table" style="display: none;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function fetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      return res.json();
+    }
+
+    function populateTable(campaigns) {
+      const table = document.getElementById('campaigns-table');
+      const tbody = table.querySelector('tbody');
+
+      // Clear existing rows
+      tbody.innerHTML = '';
+
+      // Add rows dynamically
+      campaigns.forEach((campaign) => {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        const descriptionCell = document.createElement('td');
+
+        nameCell.textContent = campaign.name;
+        descriptionCell.textContent = campaign.description;
+
+        row.appendChild(nameCell);
+        row.appendChild(descriptionCell);
+        tbody.appendChild(row);
+      });
+
+      // Show the table
+      table.style.display = 'table';
+    }
+
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const showTokenBtn = document.getElementById('show-token-btn');
+    const listCampaignsBtn = document.getElementById('list-campaigns-btn');
+    const output = document.getElementById('output');
+
+    loginBtn.onclick = async () => {
+      const data = await fetchJson('/api/login');
+      window.location.href = data.loginUrl;
+    };
+
+    logoutBtn.onclick = async () => {
+      const data = await fetchJson('/api/logout', { method: 'POST' });
+      output.textContent = data.message || data.error;
+      updateUI(false);
+    };
+
+    showTokenBtn.onclick = async () => {
+      try {
+        const data = await fetchJson('/api/show-token');
+        output.textContent = `Decoded Token:\n${JSON.stringify(decodeToken(data.token), null, 2)}`;
+      } catch (err) {
+        output.textContent = err.message;
+      }
+    };
+
+    listCampaignsBtn.onclick = async () => {
+      try {
+        const campaigns = await fetchJson('/api/list-campaigns');
+        populateTable(campaigns);
+        output.textContent = ''; // Clear any previous output
+      } catch (err) {
+        output.textContent = err.message;
+      }
+    };
+
+    function decodeToken(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+            .join('')
+        );
+        return JSON.parse(jsonPayload);
+      } catch (error) {
+        return { error: 'Invalid token' };
+      }
+    }
+
+    function updateUI(isLoggedIn) {
+      loginBtn.style.display = isLoggedIn ? 'none' : 'inline';
+      logoutBtn.style.display = isLoggedIn ? 'inline' : 'none';
+      showTokenBtn.style.display = isLoggedIn ? 'inline' : 'none';
+    }
+
+    // Initialize UI
+    fetchJson('/api/show-token').then(
+      () => updateUI(true),
+      () => updateUI(false)
+    );
+  </script>
+</body>
+</html>

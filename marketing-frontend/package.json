@@ -1,29 +1,16 @@
 {
-  "name": "marketing-html5",
-  "version": "0.0.1",
-  "description": "HTML5 Service Invocation Application",
+  "name": "marketing-frontend",
+  "version": "1.0.0",
   "main": "app.js",
   "type": "module",
   "scripts": {
     "start": "node app.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/keycloak/keycloak-quickstarts.git"
-  },
-  "keywords": [
-    "keyclock",
-    "node.js",
-    "express"
-  ],
-  "author": "Red Hat Inc.",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/keycloak/keycloak-quickstarts/issues"
-  },
-  "homepage": "https://github.com/keycloak/keycloak-quickstarts#readme",
   "dependencies": {
-    "express": "^4.17.2",
-    "jwt-decode": "^3.1.2"
+    "express": "^4.18.2",
+    "keycloak-js": "^20.0.0",
+    "body-parser": "^1.20.2",
+    "node-fetch": "^3.3.2",
+    "express-session": "^1.17.3"
   }
 }
